@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="de_DE">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="generator" content="pandoc" />
+  <meta name="author" content="Jakob Voß" />
+  <meta name="date" content="2016-04-29" />
+  <title>Entity Lookup Microservice API (ELMA)</title>
+   <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <style type="text/css">
+/*<![CDATA[*/
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+/*]]>*/
+  </style>
+  <style type="text/css">
+  body { font-family: sans-serif; }
+  a { text-decoration: none }
+  a:hover { text-decoration: underline }
+  h1 { font: 170% sans-serif }
+  h1.title { font-size: 200%; font-weight: bold; }
+  h2 { font: 140% sans-serif }
+  h3 { font: 120% sans-serif }
+  dt { font-weight: bold; }
+  h1, h2, h3, h1 a, h2 a, h3 a { color: #005A9C; }
+  table { border-collapse: collapse; }
+  td { border: 1px solid #999; padding: 3px }
+  dl p { margin-top: 0; }
+  dt { margin-top: 0.8em; }
+  dd { margin-left: 1.5em; }
+  ol { margin-bottom: 1em; }
+  table + p { margin-top: 1em; }
+  </style>
+  <link rel="stylesheet" href="/home/voj/proj/elma/makespec/templates/default.css" />
+  <link rel="stylesheet" href="makespec.css" />
+</head>
+<body>
+<a href="https://github.com/gbv/elma"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png" alt="Fork me on GitHub"></a>
+<header>
+<h1 class="title">Entity Lookup Microservice API (ELMA)</h1>
+<h3 class="author">Jakob Voß</h3>
+<h4 class="date">2016-04-29 (version 0.0.1)</h4>
+</header>
+
+<h1>Table of Contents</h1>
+<nav id="TOC">
+<ul>
+<li><a href="#introduction"><span class="toc-section-number">1</span> Introduction</a><ul>
+<li><a href="#status-of-this-document"><span class="toc-section-number">1.1</span> Status of this document</a></li>
+<li><a href="#conformance-requirements"><span class="toc-section-number">1.2</span> Conformance requirements</a></li>
+</ul></li>
+<li><a href="#general-requirements"><span class="toc-section-number">2</span> General requirements</a><ul>
+<li><a href="#base-urls"><span class="toc-section-number">2.1</span> Base URLs</a></li>
+<li><a href="#http-headers"><span class="toc-section-number">2.2</span> HTTP headers</a></li>
+<li><a href="#response-format"><span class="toc-section-number">2.3</span> Response format</a></li>
+<li><a href="#cross-origin-resource-sharing"><span class="toc-section-number">2.4</span> Cross-Origin Resource Sharing</a></li>
+<li><a href="#jsonp"><span class="toc-section-number">2.5</span> JSONP</a></li>
+<li><a href="#error-responses"><span class="toc-section-number">2.6</span> Error responses</a></li>
+</ul></li>
+<li><a href="#entity-search"><span class="toc-section-number">3</span> Entity search</a></li>
+<li><a href="#entity-lookup"><span class="toc-section-number">4</span> Entity lookup</a></li>
+<li><a href="#references"><span class="toc-section-number">5</span> References</a><ul>
+<li><a href="#normative-references">Normative references</a></li>
+<li><a href="#informative-references">Informative references</a></li>
+</ul></li>
+</ul>
+</nav>
+<section id="introduction" class="level1">
+<h1><span class="header-section-number">1</span> Introduction</h1>
+<p>The <strong>Entity Lookup Microservice API</strong> (ELMA) is an API to look up and search for entities via HTTP requests. An <strong>entity</strong> within the scope of this specification is any object identified by an URI and referred to by one name per language. In particular the API covers two use cases:</p>
+<ol type="1">
+<li>searching for an entity with a query string (<a href="#entity-search">search</a>)</li>
+<li>looking up an entity by its URI (<a href="#entity-lookup">lookup</a>)</li>
+</ol>
+<!--
+Search suggestions, also known as autocomplete or type-ahead, provide a list of
+recommended search terms as the user types a query. When searching in a KOS,
+however, the user is not looking for a terms but for concepts that often
+include multilingual and ambiguous labels.  KOS Suggest specifies methods to
+query **concept suggestions** to be used as search suggestion or concept
+selection in user interfaces.
+-->
+<section id="status-of-this-document" class="level2">
+<h2><span class="header-section-number">1.1</span> Status of this document</h2>
+<p>ELMA is currently being developed as part of project <a href="https://coli-conc.gbv.de">coli-conc</a> and <a href="https://wiki.dnb.de/display/DINIAGKIM/Normdaten+Gruppe">DINI AG KIM Normdaten</a>. The ELMA specification is hosted at <a href="http://gbv.github.io/elma/" class="uri">http://gbv.github.io/elma/</a> in the public GitHub repository <a href="https://github.com/gbv/elma" class="uri">https://github.com/gbv/elma</a>. Feedback, for instance <a href="https://github.com/gbv/elma/issues">in form of GitHub issues</a> is appreciated!</p>
+<p>This document can be shared freely under the terms of <a href="http://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>.</p>
+</section>
+<section id="conformance-requirements" class="level2">
+<h2><span class="header-section-number">1.2</span> Conformance requirements</h2>
+<p>The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and “OPTIONAL” in this document are to be interpreted as described in <a href="https://tools.ietf.org/html/rfc2119">RFC 2119</a>.</p>
+</section>
+</section>
+<section id="general-requirements" class="level1">
+<h1><span class="header-section-number">2</span> General requirements</h1>
+<section id="base-urls" class="level2">
+<h2><span class="header-section-number">2.1</span> Base URLs</h2>
+<p>An ELMA microservice MUST provide a <strong>base URL</strong> for <a href="#entity-lookup">lookup</a> and a base URL for <a href="#entity-search">search</a>. Both base URLs can be queried by HTTP GET and HTTP OPTIONS requests (<a href="https://tools.ietf.org/html/rfc7231">RFC 7231</a>) and both MAY be identical. The base URLs MAY contain fixed query parameters but it MUST NOT contain any of the reserved parameter names “q”, “uri”, “callback”, “language”, and “unique”.</p>
+<div class="example">
+<p>An ELMA microservice could be served via base URL <a href="http://example.org/" class="uri">http://example.org/</a> for both lookup and search. It could also provide two base URLs, e.g. <a href="http://example.org/?entity=lookup" class="uri">http://example.org/?entity=lookup</a> and <a href="http://example.org/?entity=search" class="uri">http://example.org/?entity=search</a>. The base URL <a href="http://example.org/lookup?q=concept" class="uri">http://example.org/lookup?q=concept</a> is not valid because it contains the reserved parameter name “q”.</p>
+</div>
+</section>
+<section id="http-headers" class="level2">
+<h2><span class="header-section-number">2.2</span> HTTP headers</h2>
+<p>An ELMA client SHOULD include the following HTTP request headers in every request:</p>
+<dl>
+<dt>User-Agent</dt>
+<dd>an approriate client name and version number
+</dd>
+<dt>Accept</dt>
+<dd>the value <code>application/json</code>
+</dd>
+</dl>
+<p>An ELMA microservice MUST include the following HTTP response header in every response to a HTTP GET response:</p>
+<dl>
+<dt>Content-Type</dt>
+<dd>the value <code>application/json</code> or <code>application/json; charset=utf-8</code>
+</dd>
+</dl>
+</section>
+<section id="response-format" class="level2">
+<h2><span class="header-section-number">2.3</span> Response format</h2>
+<p>The response body of an ELMA microservice response, if given, MUST always be a syntacticaly valid JSON document (<a href="https://tools.ietf.org/html/rfc4627">RFC 4627</a>), or a JSON document wrapped in a JavaScript function call if <a href="#jsonp">JSONP</a> is supported. This also applies to <a href="#error-responses">error responses</a>.</p>
+</section>
+<section id="cross-origin-resource-sharing" class="level2">
+<h2><span class="header-section-number">2.4</span> Cross-Origin Resource Sharing</h2>
+<p>For Cross-Origin Resource Sharing (<a href="http://www.w3.org/TR/cors/">CORS</a>) an ELMA client MUST include the following HTTP request headers:</p>
+<dl>
+<dt>Origin</dt>
+<dd>where the cross-origin request originates from
+</dd>
+<dt>Access-Control-Request-Method</dt>
+<dd>the HTTP verb <code>GET</code> (only if the request is an OPTIONS preflight request)
+</dd>
+</dl>
+<p>In response to a CORS request an ELMA microservice MUST include the following HTTP response headers:</p>
+<dl>
+<dt>Access-Control-Allow-Origin</dt>
+<dd>the value <code>*</code> or another approriate value as defined by <a href="http://www.w3.org/TR/cors/">CORS</a>
+</dd>
+<dt>Access-Control-Allow-Headers</dt>
+<dd>a comma-separated list of usable request headers as defined by <a href="http://www.w3.org/TR/cors/">CORS</a>. MUST at least contain the value <code>Content-Type</code>
+</dd>
+</dl>
+<p>Note that ELMA clients do not need to respect CORS rules. CORS preflight requests in browsers can be avoided by omitting the request header <code>Accept</code>.</p>
+</section>
+<section id="jsonp" class="level2">
+<h2><span class="header-section-number">2.5</span> JSONP</h2>
+<p>An ELMA microservice MAY support JSONP by respecting the additional query parameter <code>callback</code>. If a HTTP request URL contains this query parameter and if its value only contain alphanumeric characters and underscores, the HTTP response is modified as following:</p>
+<ul>
+<li><p>The value of response header <strong>Content-Type</strong> is changed to <code>application/javascript</code> or <code>application/javascript; charset=utf-8</code>.</p></li>
+<li><p>The response body is wrapped in a JavaScript call to the given callback function.</p></li>
+</ul>
+</section>
+<section id="error-responses" class="level2">
+<h2><span class="header-section-number">2.6</span> Error responses</h2>
+<p>Error responses with HTTP status code 4xx (client error) or 5xx (server error) SHOULD be returned with a JSON object response body having the following fields:</p>
+<ul>
+<li><strong><code>code</code></strong> (REQUIRED) the HTTP status error code.</li>
+<li><strong><code>error</code></strong> (REQUIRED) a custom error code. Allowed characters include <code>a-z</code>, <code>0-9</code> and underscore (<code>_</code>).</li>
+<li><strong><code>message</code></strong> (OPTIONAL) a human-readable error message. Intended to be shown to an end user.</li>
+<li><strong><code>error_description</code></strong> (OPTIONAL) a human-readable error description. Intended for a developer, not an end user.</li>
+<li><strong><code>error_uri</code></strong> (OPTIONAL) a URL of a human-readable web page with information about the error.</li>
+</ul>
+<p>The response header <code>Content-Language</code> MUST indicate the language of human-readable error message and description. The request header <code>Accept-Language</code> SHOULD be supported if error messages and descriptions are available in multiple languages.</p>
+<div class="example">
+<p>An ELMA microservice may implement rate limiting and issue an error if the number of requests in a given span of time has been exhausted:</p>
+<div class="sourceCode"><pre class="sourceCode json"><code class="sourceCode json"><span class="fu">{</span>
+  <span class="dt">&quot;code&quot;</span><span class="fu">:</span> <span class="dv">429</span><span class="fu">,</span>
+  <span class="dt">&quot;error&quot;</span><span class="fu">:</span> <span class="st">&quot;too_many_requests&quot;</span><span class="fu">,</span>
+  <span class="dt">&quot;message&quot;</span><span class="fu">:</span> <span class="st">&quot;Too many requests&quot;</span><span class="fu">,</span>
+  <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;Please slow down your request rate!&quot;</span><span class="fu">,</span>
+  <span class="dt">&quot;error_uri&quot;</span><span class="fu">:</span> <span class="st">&quot;http://example.org/api-policy&quot;</span> 
+<span class="fu">}</span></code></pre></div>
+</div>
+</section>
+</section>
+<section id="entity-search" class="level1">
+<h1><span class="header-section-number">3</span> Entity search</h1>
+<p>Entities can be searched in a ELMA microservice by an HTTP GET request at its <a href="#base-urls">search base URL</a> and query parameter “q”. A client SHOULD further include the <strong>Accept-Language</strong> request header in search requests.</p>
+<p>The response of an ELMA microservice entity search MUST be a JSON array of the following four values:</p>
+<dl>
+<dt>query string</dt>
+<dd>the (possibly normalized) query as given with query parameter “q”
+</dd>
+<dt>labels</dt>
+<dd>an array of entity labels which MUST be non-empty strings
+</dd>
+<dt>descriptions</dt>
+<dd>an array of additional entity descriptions which MAY be empty strings
+</dd>
+<dt>identifiers</dt>
+<dd>an array of distinct entity URIs, each given as string
+</dd>
+</dl>
+<p>The order of entities is expected to result from relevance ranking. The query parameter “q” SHOULD NOT be expected to follow a specific search syntax or query language but a plain string.</p>
+<p>The response of an entity search MUST include a <strong>Content-Language</strong> header giving the language of labels and descriptions in the response. The language SHOULD be influenced by Accept-Language response field and an optional request parameter “language”.</p>
+<div class="note">
+<p>The result format is fully compatible with <a href="http://www.opensearch.org/Specifications/OpenSearch/Extensions/Suggestions/1.0">OpenSearch Suggestions</a>, so every search base URL of an ELMA microservice can also be used as OpenSarch Suggestions service.</p>
+</div>
+<div class="example">
+<p>Request:</p>
+<p><a href="http://example.org/?q=Go%CC%88the">http://example.org/?q=Go%CC%88the</a> (“Göthe” with Unicode decomposed characters)</p>
+<p>Response (Unicode normalization form C, relevance ranking):</p>
+<pre><code>Content-Lanuage: en</code></pre>
+<div class="sourceCode"><pre class="sourceCode json"><code class="sourceCode json"><span class="ot">[</span>
+  <span class="st">&quot;Göthe&quot;</span><span class="ot">,</span>
+  <span class="ot">[</span>
+   <span class="st">&quot;Johann Wolfgang von Goethe&quot;</span><span class="ot">,</span>
+   <span class="st">&quot;Göthe Emanuel Hedlund&quot;</span><span class="ot">,</span>
+   <span class="st">&quot;Göthe Grefbo&quot;</span>
+  <span class="ot">],[</span>
+   <span class="st">&quot;German writer, artist, and politician (1749-1832)&quot;</span><span class="ot">,</span>
+   <span class="st">&quot;Speed skater (1918-2003)&quot;</span><span class="ot">,</span>
+   <span class="st">&quot;Swedish Actor (1921-1991)&quot;</span>
+  <span class="ot">],[</span>
+   <span class="st">&quot;http://www.wikidata.org/entity/Q5879&quot;</span><span class="ot">,</span>
+   <span class="st">&quot;http://www.wikidata.org/entity/Q3431981&quot;</span><span class="ot">,</span>
+   <span class="st">&quot;http://www.wikidata.org/entity/Q2054509&quot;</span>
+  <span class="ot">]</span>
+<span class="ot">]</span></code></pre></div>
+</div>
+</section>
+<section id="entity-lookup" class="level1">
+<h1><span class="header-section-number">4</span> Entity lookup</h1>
+<p>Entities can be looked up in ELMA microservice by an HTTP GET request at its <a href="#base-urls">lookup base URL</a> and query parameter “uri”. The parameter value MUST be a syntactically correct IRI (<a href="https://tools.ietf.org/html/rfc3987">RFC 3987</a>). An <a href="#error-responses">error response</a> with status code 422 SHOULD be returned if parameter “uri” contains is syntactically invalid, if it is repeated, or if both parameters “uri” and “q” are given with a non-empty value.</p>
+<p>The response to an entity lookup request MUST be an empty JSON array if no entity was found with the given URI or a JSON array containing one member otherwise. The response code MUST NOT be 404 if the entity was not found.</p>
+<p>A found entity MUST be expressed as JSON object that conforms to the following restrictions:</p>
+<ul>
+<li><p>The entity object MUST contain a key <code>uri</code> with the entity URI as value</p></li>
+<li><p>The entity object SHOULD contain a key <code>prefLabel</code>. The value of this object MUST be a JSON object with <a href="https://tools.ietf.org/html/rfc3066">RFC 3066</a> language tags as keys and entity names as string values. The choice of language tags SHOULD be influencable with the Accept-Language HTTP header and an optional request parameter “language”.</p></li>
+</ul>
+<p>Applications MAY include additional fields as long as their name starts with an uppercase letter. Additional fields starting with lowercase letters may be specified in an extended version of ELMA.</p>
+<div class="example">
+<p>Request:</p>
+<p><a href="http://example.org/api?uri=http%3A%2F%2Fwww.wikidata.org%2Fentity%2FQ3431981">http://example.org/api?uri=http%3A%2F%2Fwww.wikidata.org%2Fentity%2FQ3431981</a></p>
+<p>Response:</p>
+<div class="sourceCode"><pre class="sourceCode json"><code class="sourceCode json"><span class="ot">[</span>
+  <span class="fu">{</span>
+    <span class="dt">&quot;uri&quot;</span><span class="fu">:</span> <span class="st">&quot;http://www.wikidata.org/entity/Q5879&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;prefLabel&quot;</span><span class="fu">:</span> <span class="fu">{</span>
+      <span class="dt">&quot;de&quot;</span><span class="fu">:</span> <span class="st">&quot;Johann Wolfgang von Goethe&quot;</span><span class="fu">,</span>
+      <span class="dt">&quot;en&quot;</span><span class="fu">:</span> <span class="st">&quot;Johann Wolfgang von Goethe&quot;</span><span class="fu">,</span>
+      <span class="dt">&quot;ja&quot;</span><span class="fu">:</span> <span class="st">&quot;ヨハン・ヴォルフガング・フォン・ゲーテ&quot;</span>
+    <span class="fu">}</span>
+  <span class="fu">}</span>
+<span class="ot">]</span></code></pre></div>
+</div>
+<p>All URIs included in an entiy <a href="#entity-search">search</a> responses MUST result in a non-empty lookup response of the same ELMA microservice. The entity label in field <code>prefLabel</code> SHOULD be identical to the label included in an entity search response for the given language tag in response header Content-Language.</p>
+</section>
+<section id="references" class="level1">
+<h1><span class="header-section-number">5</span> References</h1>
+<section id="normative-references" class="level2 unnumbered">
+<h2>Normative references</h2>
+<ul>
+<li><p>S. Bradner: <em>Key words for use in RFCs to Indicate Requirement Levels</em>. RFC 2119, March 1997. <a href="https://tools.ietf.org/html/rfc2119" class="uri">https://tools.ietf.org/html/rfc2119</a></p></li>
+<li><p>D. Crockford: <em>The application/json Media Type for JavaScript Object Notation (JSON)</em>. RFC 4627, July 2006. <a href="https://tools.ietf.org/html/rfc4627" class="uri">https://tools.ietf.org/html/rfc4627</a></p></li>
+<li><p>M. Dürst, M. Suignard: <em>Internationalized Resource Identifiers (IRIs)</em>. RFC 3987, January 2005. <a href="https://tools.ietf.org/html/rfc3987" class="uri">https://tools.ietf.org/html/rfc3987</a></p></li>
+<li><p>R. Fielding, J. Reschke: <em>Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content</em> RFC 7231, June 2014. <a href="https://tools.ietf.org/html/rfc7231" class="uri">https://tools.ietf.org/html/rfc7231</a></p></li>
+<li><p>A. Phillips, M. Davis: <em>Tags for Identifying Languages</em>. RFC 3066, September 2006. <a href="https://tools.ietf.org/html/rfc3066" class="uri">https://tools.ietf.org/html/rfc3066</a></p></li>
+<li><p>A. van Kesteren <em>Cross-Origin Resource Sharing</em> W3C Recommendation, January 2014. <a href="http://www.w3.org/TR/cors/" class="uri">http://www.w3.org/TR/cors/</a></p></li>
+</ul>
+</section>
+<section id="informative-references" class="level2 unnumbered">
+<h2>Informative references</h2>
+<ul>
+<li><p>M. Davis, K. Whistler: <em>Unicode Normalization Forms</em>. Unicode Standard Annex #15. <a href="http://www.unicode.org/reports/tr15/" class="uri">http://www.unicode.org/reports/tr15/</a></p></li>
+<li><p>A. Phillips, M. Davis: <em>Tags for Identifying Languages</em>. RFC 4646, October 2005. <a href="http://tools.ietf.org/html/rfc4646" class="uri">http://tools.ietf.org/html/rfc4646</a></p></li>
+<li><p>A. Phillips, M. Davis: <em>Matching of Language Tags</em>. RFC 4647, September 2006. <a href="http://tools.ietf.org/html/rfc4647" class="uri">http://tools.ietf.org/html/rfc4647</a></p></li>
+<li><p>D. Clintin: <em>OpenSearch Suggestions 1.0</em>. 2005. <a href="http://www.opensearch.org/Specifications/OpenSearch/Extensions/Suggestions" class="uri">http://www.opensearch.org/Specifications/OpenSearch/Extensions/Suggestions</a></p></li>
+</ul>
+</section>
+</section>
+</body>
+</html>
