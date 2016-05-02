@@ -5,17 +5,17 @@ for entities via HTTP requests. An **entity** within the scope of this
 specification is any object identified by an URI and referred to by one name
 per language. In particular the API covers two use cases:
 
-1. searching for an entity with a query string ([search])
-2. looking up an entity by its URI ([lookup]) 
+[entity search]
+  : searching with a query string to get a list of possibly matching entities, 
+    each with label, descriptions, and entity URIs. This use case is also known 
+    as search suggestions, autocomplete, or type-ahead.
 
-<!--
-Search suggestions, also known as autocomplete or type-ahead, provide a list of
-recommended search terms as the user types a query. When searching in a KOS,
-however, the user is not looking for a terms but for concepts that often
-include multilingual and ambiguous labels.  KOS Suggest specifies methods to
-query **concept suggestions** to be used as search suggestion or concept
-selection in user interfaces.
--->
+[entity lookup]
+  : looking up an entity by its URI to get its name and possibly other properties.
+
+ELMA services can be used for instance for semantic tagging and named-entity
+resolution by selecting identified concepts from knowledge organization
+systems.
 
 ## Status of this document
 
@@ -43,16 +43,19 @@ interpreted as described in [RFC 2119].
 [lookup base URL]: #base-urls
 [search base URL]: #base-urls
 
-An ELMA microservice MUST provide a **base URL** for [lookup] and a base URL
-for [search]. Both base URLs can be queried by HTTP GET and HTTP OPTIONS
-requests ([RFC 7231]) and both MAY be identical. The base URLs MAY contain
-fixed query parameters but it MUST NOT contain any of the reserved parameter
-names "q", "uri", "callback", "language", and "unique".
+An ELMA microservice MUST provide a **base URL** for [entity lookup] and a base
+URL for [entity search]. Both base URLs can be queried by HTTP GET and HTTP
+OPTIONS requests ([RFC 7231]) and both MAY be identical. The base URLs MAY
+contain fixed query parameters but it MUST NOT contain any of the reserved
+parameter names "q", "uri", "callback", "language", and "unique".
 
 <div class="example">
-An ELMA microservice could be served via base URL <http://example.org/> for
-both lookup and search. It could also provide two base URLs, e.g.
-<http://example.org/?entity=lookup> and <http://example.org/?entity=search>.
+An ELMA microservice could 
+
+* be served via base URL <http://example.org/> for both lookup and search
+
+* provide two base URLs, e.g. <http://example.org/?entity=lookup> and <http://example.org/?entity=search>
+
 The base URL <http://example.org/lookup?q=concept> is not valid because it
 contains the reserved parameter name "q".
 </div>
@@ -66,13 +69,13 @@ User-Agent
   : an approriate client name and version number
 
 Accept
-  : the value `application/json`
+  : the value "application/json"
 
 An ELMA microservice MUST include the following HTTP response header in every
 response to a HTTP GET response:
 
 Content-Type
-  : the value `application/json` or `application/json; charset=utf-8`
+  : the value "application/json" or "application/json; charset=utf-8"
 
 ## Response format
 
@@ -90,30 +93,30 @@ Origin
   : where the cross-origin request originates from
 
 Access-Control-Request-Method
-  : the HTTP verb `GET` (only if the request is an OPTIONS preflight request)
+  : the HTTP verb "GET" (only if the request is an OPTIONS preflight request)
 
 In response to a CORS request an ELMA microservice MUST include the following
 HTTP response headers:
 
 Access-Control-Allow-Origin
-  : the value `*` or another approriate value as defined by [CORS]
+  : the value "\*" or another approriate value as defined by [CORS]
 
 Access-Control-Allow-Headers
   : a comma-separated list of usable request headers as defined by [CORS].
-    MUST at least contain the value `Content-Type`
+    MUST at least contain the value "Content-Type"
 
 Note that ELMA clients do not need to respect CORS rules. CORS preflight
-requests in browsers can be avoided by omitting the request header `Accept`.
+requests in browsers can be avoided by omitting the request header "Accept".
 
 ## JSONP
 
 An ELMA microservice MAY support JSONP by respecting the additional query
-parameter `callback`.  If a HTTP request URL contains this query parameter and
+parameter "callback".  If a HTTP request URL contains this query parameter and
 if its value only contain alphanumeric characters and underscores, the HTTP
 response is modified as following: 
 
-* The value of response header **Content-Type** is changed to
-  `application/javascript` or `application/javascript; charset=utf-8`.
+* The value of response header "Content-Type" is changed to
+  "application/javascript" or "application/javascript; charset=utf-8".
 
 * The response body is wrapped in a JavaScript call to the given callback
   function.
@@ -125,19 +128,28 @@ Error responses with HTTP status code 4xx (client error) or 5xx (server error)
 SHOULD be returned with a JSON object response body having the following
 fields:
 
-* **`code`** (REQUIRED) the HTTP status error code.
-* **`error`** (REQUIRED) a custom error code. 
-  Allowed characters include `a-z`, `0-9` and underscore (`_`).
-* **`message`** (OPTIONAL) a human-readable error message.
-  Intended to be shown to an end user.
-* **`error_description`** (OPTIONAL) a human-readable error description.
-  Intended for a developer, not an end user.
-* **`error_uri`** (OPTIONAL) a URL of a human-readable web page with
-  information about the error.
+code
+  : the HTTP status error code (REQUIRED)
 
-The response header `Content-Language` MUST indicate the language of
+error
+  : a custom error code (REQUIRED). 
+    Allowed characters include `a-z`, `0-9` and underscore (`_`).
+
+message
+  : a human-readable error message, intended to be shown to an end user
+    (OPTIONAL)
+
+error_description
+  : a human-readable error description, intended for a developer, 
+    not an end user (OPTIONAL)
+
+error_uri
+  : an URL of a human-readable web page with information about the error
+    (OPTIONAL)
+
+The response header "Content-Language" MUST indicate the language of
 human-readable error message and description. The request header
-`Accept-Language` SHOULD be supported if error messages and descriptions are
+"Accept-Language" SHOULD be supported if error messages and descriptions are
 available in multiple languages.
 
 <div class="example">
@@ -156,7 +168,7 @@ the number of requests in a given span of time has been exhausted:
 </div>
 
 # Entity search
-[search]: #entity-search
+[entity search]: #entity-search
 
 Entities can be searched in a ELMA microservice by an HTTP GET request at its
 [search base URL] and query parameter "q". A client SHOULD further include the
@@ -200,6 +212,7 @@ Request:
 Response (Unicode normalization form C, relevance ranking):
 
     Content-Lanuage: en
+    Content-Type: application/json
 
 ~~~json
 [
@@ -222,7 +235,7 @@ Response (Unicode normalization form C, relevance ranking):
 </div>
 
 # Entity lookup
-[lookup]: #entity-lookup
+[entity lookup]: #entity-lookup
 
 Entities can be looked up in ELMA microservice by an HTTP GET request at its
 [lookup base URL] and query parameter "uri". The parameter value MUST be a
@@ -238,16 +251,26 @@ otherwise. The response code MUST NOT be 404 if the entity was not found.
 A found entity MUST be expressed as JSON object that conforms to the following
 restrictions:
 
-* The entity object MUST contain a key `uri` with the entity URI as value
+* The entity object MUST contain a key "uri" with the entity URI as value
 
-* The entity object SHOULD contain a key `prefLabel`. The value of this object
+* The entity object SHOULD contain a key "prefLabel". The value of this object
   MUST be a JSON object with [RFC 3066] language tags as keys and entity names 
   as string values. The choice of language tags SHOULD be influencable with the
   Accept-Language HTTP header and an optional request parameter "language".
 
+* The "prefLabel" object MAY contain additional keys ending with the 
+  character "-" to indicate existence of additional labels. Values of these 
+  fields SHOULD be ignored.
+
 Applications MAY include additional fields as long as their name starts with an
 uppercase letter.  Additional fields starting with lowercase letters may be
 specified in an extended version of ELMA.
+
+<div class="note">
+The response format is aligned with [JSKOS data format for Knowledge
+Organization Systems](https://gbv.github.io/jskos/) but neither ELMA services
+nor ELMA clients need to know about details of JSKOS.
+</div>
 
 <div class="example">
 Request:
@@ -255,6 +278,8 @@ Request:
 <http://example.org/api?uri=http%3A%2F%2Fwww.wikidata.org%2Fentity%2FQ3431981>
 
 Response:
+
+    Content-Type: application/json
 
 ~~~json
 [
@@ -270,9 +295,9 @@ Response:
 ~~~
 </div>
 
-All URIs included in an entiy [search] responses MUST result in a non-empty
+All URIs included in an [entity search] responses MUST result in a non-empty
 lookup response of the same ELMA microservice. The entity label in field
-`prefLabel` SHOULD be identical to the label included in an entity search
+"prefLabel" SHOULD be identical to the label included in an entity search
 response for the given language tag in response header Content-Language.
 
 # References
@@ -320,6 +345,9 @@ response for the given language tag in response header Content-Language.
 
 * D. Clintin: *OpenSearch Suggestions 1.0*. 2005.
   <http://www.opensearch.org/Specifications/OpenSearch/Extensions/Suggestions>
+
+* J. Voß: *JSKOS data format for Knowledge Organization Systems*.
+  February 2016. <https://gbv.github.io/jskos/>
 
 [RFC 4646]: http://tools.ietf.org/html/rfc4646
 [RFC 4647]: http://tools.ietf.org/html/rfc4647
