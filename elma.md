@@ -47,7 +47,7 @@ An ELMA microservice MUST provide a **base URL** for [entity lookup] and a base
 URL for [entity search]. Both base URLs can be queried by HTTP GET and HTTP
 OPTIONS requests ([RFC 7231]) and both MAY be identical. The base URLs MAY
 contain fixed query parameters but it MUST NOT contain any of the reserved
-parameter names "q", "uri", "callback", "language", and "unique".
+parameter names "uri", "search", "callback", "language", and "unique".
 
 <div class="example">
 An ELMA microservice could 
@@ -56,8 +56,8 @@ An ELMA microservice could
 
 * provide two base URLs, e.g. <http://example.org/?entity=lookup> and <http://example.org/?entity=search>
 
-The base URL <http://example.org/lookup?q=concept> is not valid because it
-contains the reserved parameter name "q".
+The base URL <http://example.org/lookup?search=concept> is not valid because it
+contains the reserved parameter name "search".
 </div>
 
 ## HTTP headers
@@ -171,14 +171,14 @@ the number of requests in a given span of time has been exhausted:
 [entity search]: #entity-search
 
 Entities can be searched in a ELMA microservice by an HTTP GET request at its
-[search base URL] and query parameter "q". A client SHOULD further include the
-**Accept-Language** request header in search requests.
+[search base URL] and query parameter "search". A client SHOULD further include
+the **Accept-Language** request header in search requests.
 
 The response of an ELMA microservice entity search MUST be a JSON array of the
 following four values:
  
 query string
-  : the (possibly normalized) query as given with query parameter "q"
+  : the (possibly normalized) query as given with query parameter "search"
 
 labels
   : an array of entity labels which MUST be non-empty strings
@@ -190,8 +190,8 @@ identifiers
   : an array of distinct entity URIs, each given as string
 
 The order of entities is expected to result from relevance ranking. The query
-parameter "q" SHOULD NOT be expected to follow a specific search syntax or query
-language but a plain string.
+parameter "search" SHOULD NOT be expected to follow a specific search syntax or
+query language but a plain string.
 
 The response of an entity search MUST include a **Content-Language** header
 giving the language of labels and descriptions in the response. The language
@@ -207,7 +207,7 @@ Suggestions service.
 <div class="example">
 Request:
 
-<http://example.org/?q=Go%CC%88the> ("Göthe" with Unicode decomposed characters)
+<http://example.org/?search=Go%CC%88the> ("Göthe" with Unicode decomposed characters)
 
 Response (Unicode normalization form C, relevance ranking):
 
@@ -241,8 +241,8 @@ Entities can be looked up in ELMA microservice by an HTTP GET request at its
 [lookup base URL] and query parameter "uri". The parameter value MUST be a
 syntactically correct IRI ([RFC 3987]). An [error response] with status code
 422 SHOULD be returned if parameter "uri" contains is syntactically invalid, if
-it is repeated, or if both parameters "uri" and "q" are given with a non-empty
-value.
+it is repeated, or if both parameters "uri" and "search" are given with a
+non-empty value.
 
 The response to an entity lookup request MUST be an empty JSON array if no
 entity was found with the given URI or a JSON array containing one member
@@ -258,9 +258,10 @@ restrictions:
   as string values. The choice of language tags SHOULD be influencable with the
   Accept-Language HTTP header and an optional request parameter "language".
 
-* The "prefLabel" object MAY contain additional keys ending with the 
-  character "-" to indicate existence of additional labels. Values of these 
-  fields SHOULD be ignored.
+* The "prefLabel" object MAY contain additional keys ending with the character
+  "-" to indicate existence of additional labels. These keys can also be
+  referred to as language ranges. Values of these keys SHOULD be ignored as they
+  only act as boolean existence flags.
 
 Applications MAY include additional fields as long as their name starts with an
 uppercase letter.  Additional fields starting with lowercase letters may be
@@ -352,4 +353,14 @@ response for the given language tag in response header Content-Language.
 [RFC 4646]: http://tools.ietf.org/html/rfc4646
 [RFC 4647]: http://tools.ietf.org/html/rfc4647
 [OpenSearch Suggestions]: http://www.opensearch.org/Specifications/OpenSearch/Extensions/Suggestions/1.0
+
+# Changelog {.unnumbered}
+
+### 0.0.3 (2016-05-04) {.unnumbered}
+
+* Changed query paramater "q" to "search"
+
+### 0.0.2 (2016-05-02) {.unnumbered}
+
+* Allow language ranges in response format
 
